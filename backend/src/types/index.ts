@@ -122,3 +122,160 @@ export interface ParsedGitUrl {
   owner: string;
   name: string;
 }
+
+export interface ContributorListItem {
+  id: string;
+  name: string;
+  email: string;
+  totalCommits: number;
+  firstCommitDate: string;
+  lastCommitDate: string;
+}
+
+export interface ContributorActivityBucket {
+  period: string;
+  count: number;
+}
+
+export interface ContributorDetail extends ContributorListItem {
+  commitsPerWeek: ContributorActivityBucket[];
+  commitsPerMonth: ContributorActivityBucket[];
+  recentCommits: { hash: string; message: string; commitDate: string }[];
+}
+
+export interface SyncContributorsResult {
+  repositoryId: string;
+  contributorsSynced: number;
+}
+
+export interface ContributorChartItem {
+  name: string;
+  email: string;
+  totalCommits: number;
+}
+
+export interface RepositoryStats {
+  totalCommits: number;
+  totalBranches: number;
+  totalContributors: number;
+  totalMergeCommits: number;
+  averageCommitsPerDay: number;
+  repositoryAgeDays: number;
+  repositoryAgeYears: number;
+  firstCommitDate: string | null;
+  latestCommitDate: string | null;
+  averageCommitsPerContributor: number;
+  activeContributorsLast30Days: number;
+  mostActiveContributor: { name: string; email: string; totalCommits: number } | null;
+  commitsByContributor: ContributorChartItem[];
+  commitsOverTime: ContributorActivityBucket[];
+}
+
+export type HeatmapRange = '30d' | '90d' | '1y' | 'all';
+
+export interface HeatmapEntry {
+  date: string;
+  commitCount: number;
+}
+
+export interface RepositoryFile {
+  path: string;
+  name: string;
+}
+
+export interface FileHistoryEntry {
+  hash: string;
+  author: string;
+  message: string;
+  commitDate: string;
+}
+
+export interface FileHistoryResponse {
+  entries: FileHistoryEntry[];
+  hasMore: boolean;
+}
+
+export type DiffFileStatus = 'added' | 'modified' | 'deleted' | 'renamed' | 'copied' | 'binary';
+
+export interface DiffFile {
+  path: string;
+  oldPath: string | null;
+  status: DiffFileStatus;
+  additions: number;
+  deletions: number;
+  patch: string | null;
+}
+
+export interface CommitDiff {
+  commitHash: string;
+  author: string;
+  message: string;
+  commitDate: string;
+  files: DiffFile[];
+}
+
+export interface ComparisonCommitSummary {
+  hash: string;
+  author: string;
+  message: string;
+  commitDate: string;
+}
+
+export interface BranchComparison {
+  sourceBranch: string;
+  targetBranch: string;
+  mergeBase: string;
+  aheadCount: number;
+  behindCount: number;
+  additions: number;
+  deletions: number;
+  changedFiles: string[];
+  sourceUniqueCommits: ComparisonCommitSummary[];
+  targetUniqueCommits: ComparisonCommitSummary[];
+}
+
+export interface PlaybackGraphState {
+  nodes: GraphNode[];
+  edges: GraphEdge[];
+}
+
+export interface PlaybackTimelineEntry {
+  timestamp: string;
+  commitHash: string;
+  graphState: PlaybackGraphState;
+}
+
+export type PlaybackDateFilter = 'all' | '1y' | '6m' | 'custom';
+
+export interface PlaybackTimeline {
+  repositoryId: string;
+  baseGraph: GraphResponse;
+  timeline: PlaybackTimelineEntry[];
+}
+
+export interface ImpactCommit {
+  hash: string;
+  message: string;
+  author: string;
+  date: string;
+  impactScore: number;
+  additions: number;
+  deletions: number;
+  filesChanged: number;
+}
+
+export interface ImpactInsights {
+  mostImpactfulContributor: { name: string; totalImpact: number } | null;
+  mostImpactfulBranch: { name: string; score: number } | null;
+  mostImpactfulMonth: { period: string; totalImpact: number } | null;
+  largestCommit: { hash: string; impactScore: number; message: string } | null;
+  largestMerge: { hash: string; impactScore: number; message: string } | null;
+  totalCommits?: number;
+}
+
+export interface ImpactAnalysisResponse {
+  repositoryId: string;
+  topCommits: ImpactCommit[];
+  insights: ImpactInsights;
+  scoreByHash: Record<string, number>;
+}

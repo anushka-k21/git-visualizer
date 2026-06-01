@@ -11,14 +11,15 @@ datasource db {
 }
 
 model Repository {
-  id        String   @id @default(uuid())
-  name      String
-  owner     String
-  url       String   @unique
-  localPath String
-  createdAt DateTime @default(now())
-  commits   Commit[]
-  branches  Branch[]
+  id           String        @id @default(uuid())
+  name         String
+  owner        String
+  url          String        @unique
+  localPath    String
+  createdAt    DateTime      @default(now())
+  commits      Commit[]
+  branches     Branch[]
+  contributors Contributor[]
 
   @@map("repositories")
 }
@@ -39,6 +40,7 @@ model Commit {
   @@index([hash])
   @@index([repositoryId])
   @@index([repositoryId, commitDate])
+  @@index([repositoryId, email])
   @@map("commits")
 }
 
@@ -55,4 +57,21 @@ model Branch {
   @@index([repositoryId])
   @@index([headCommitHash])
   @@map("branches")
+}
+
+model Contributor {
+  id              String   @id @default(uuid())
+  name            String
+  email           String
+  repositoryId    String
+  totalCommits    Int
+  firstCommitDate DateTime
+  lastCommitDate  DateTime
+  repository      Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  createdAt       DateTime @default(now())
+
+  @@unique([repositoryId, email])
+  @@index([repositoryId])
+  @@index([email])
+  @@map("contributors")
 }

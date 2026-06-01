@@ -61,6 +61,12 @@ export const RepositoryCard: React.FC<RepositoryCardProps> = ({ repository }) =>
 
             <div className="flex items-center gap-1 shrink-0">
               <Link
+                to={`/repositories/${repository.id}/insights`}
+                className="btn-ghost text-xs px-2 py-1"
+              >
+                Insights
+              </Link>
+              <Link
                 to={`/repositories/${repository.id}/graph`}
                 className="btn-ghost text-xs px-2 py-1"
               >
@@ -71,6 +77,30 @@ export const RepositoryCard: React.FC<RepositoryCardProps> = ({ repository }) =>
                 className="btn-ghost text-xs px-2 py-1"
               >
                 Timeline
+              </Link>
+              <Link
+                to={`/repositories/${repository.id}/files`}
+                className="btn-ghost text-xs px-2 py-1"
+              >
+                Files
+              </Link>
+              <Link
+                to={`/repositories/${repository.id}/compare`}
+                className="btn-ghost text-xs px-2 py-1"
+              >
+                Compare
+              </Link>
+              <Link
+                to={`/repositories/${repository.id}/playback`}
+                className="btn-ghost text-xs px-2 py-1"
+              >
+                Playback
+              </Link>
+              <Link
+                to={`/repositories/${repository.id}/impact`}
+                className="btn-ghost text-xs px-2 py-1"
+              >
+                Impact
               </Link>
               {confirmDelete && (
                 <button

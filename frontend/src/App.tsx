@@ -6,6 +6,11 @@ import Dashboard from './pages/Dashboard';
 import RepositoryPage from './pages/RepositoryPage';
 import RepositoryGraphPage from './pages/RepositoryGraphPage';
 import RepositoryTimelinePage from './pages/RepositoryTimelinePage';
+import RepositoryInsightsPage from './pages/RepositoryInsightsPage';
+import RepositoryFilesPage from './pages/RepositoryFilesPage';
+import BranchComparisonPage from './pages/BranchComparisonPage';
+import RepositoryPlaybackPage from './pages/RepositoryPlaybackPage';
+import ImpactDashboardPage from './pages/ImpactDashboardPage';
 import { useRepositories } from './hooks/useRepositories';
 
 const queryClient = new QueryClient({
@@ -29,6 +34,11 @@ function AppLayout() {
           <Route path="/repositories" element={<RepositoryPage />} />
           <Route path="/repositories/:id/graph" element={<RepositoryGraphPage />} />
           <Route path="/repositories/:id/timeline" element={<RepositoryTimelinePage />} />
+          <Route path="/repositories/:id/insights" element={<RepositoryInsightsPage />} />
+          <Route path="/repositories/:id/files" element={<RepositoryFilesPage />} />
+          <Route path="/repositories/:id/compare" element={<BranchComparisonPage />} />
+          <Route path="/repositories/:id/playback" element={<RepositoryPlaybackPage />} />
+          <Route path="/repositories/:id/impact" element={<ImpactDashboardPage />} />
         </Routes>
       </main>
     </div>

@@ -414,6 +414,23 @@ git@github.com:owner/repo.git
 - [x] React Flow commit graph UI at `/repositories/:id/graph`
 - [x] Pan, zoom, fit view, and commit node selection
 
+### Phase 8–10
+
+- [x] Commit diff viewer (`GET /commits/:hash/diff`) with unified/split UI
+- [x] Branch comparison (`GET /repositories/:id/compare`) + aggregate diff
+- [x] Repository playback (`GET /repositories/:id/playback`)
+- [x] Commit impact analysis (`GET /repositories/:id/impact`) with on-demand cache
+- [x] Graph integrations: compare highlights, impact node sizing
+
+### Phase 6–7
+
+- [x] Contributor model and aggregation (email as identity)
+- [x] Repository statistics (GET /repositories/:id/stats)
+- [x] Contributor APIs and insights dashboard with Recharts
+- [x] Contribution heatmap (GET /repositories/:id/heatmap?range=)
+- [x] File explorer and history (GET /files, GET /files/history)
+- [x] File history → graph navigation
+
 ### Phase 4–5
 
 - [x] Commit details panel (GET /commits/:hash)
@@ -432,12 +449,39 @@ git@github.com:owner/repo.git
 
 Large repositories (10k+ commits) may take several minutes to sync.
 
-### Database migration (Phase 4)
+### Database migrations
 
 ```bash
 cd backend
 npx prisma migrate dev
 ```
+
+### New API endpoints (Phase 6–7)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/repositories/:id/sync-contributors` | Rebuild contributor aggregates |
+| GET | `/repositories/:id/stats` | Repository-wide statistics + chart data |
+| GET | `/repositories/:id/contributors` | Contributor list |
+| GET | `/repositories/:id/contributors/:contributorId` | Contributor detail |
+| GET | `/repositories/:id/heatmap?range=30d\|90d\|1y\|all` | Daily commit counts |
+| GET | `/repositories/:id/files?search=` | List repository files |
+| GET | `/repositories/:id/files/history?path=` | Paginated file history |
+| GET | `/commits/:hash/diff?repositoryId=` | Commit diff with patches |
+| GET | `/repositories/:id/compare?sourceBranch=&targetBranch=` | Branch comparison |
+| GET | `/repositories/:id/compare/diff?...` | Aggregate diff between branches |
+| GET | `/repositories/:id/playback?filter=all\|1y\|6m` | Playback timeline frames |
+| GET | `/repositories/:id/impact?limit=` | Top impactful commits + scores |
+
+### UI routes
+
+- `/repositories/:id/insights` — stats, charts, heatmap, contributors
+- `/repositories/:id/files` — file explorer and history
+- `/repositories/:id/compare` — branch comparison + graph highlights
+- `/repositories/:id/playback` — history replay controls
+- `/repositories/:id/impact` — impact dashboard and graph sizing
+
+**Impact scoring:** computed on demand with in-memory cache (invalidated on commit sync). Samples up to 500 commits for line-level stats via `git diff-tree`; remaining commits use graph-derived metrics (descendants, merges, branch heads).
 
 ---
 

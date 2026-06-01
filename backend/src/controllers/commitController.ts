@@ -1,6 +1,10 @@
 import { Request, Response } from 'express';
 import { CommitParseService } from '../services/commit/commitParseService';
 import { graphService } from '../services/graph/graphServiceInstance';
+import { ContributorAnalyticsService } from '../services/analytics/contributorAnalyticsService';
+import { impactAnalysisService } from '../services/impact/impactAnalysisServiceInstance';
+
+const contributorAnalyticsService = new ContributorAnalyticsService();
 import { GitService } from '../services/git/gitService';
 import {
   ApiResponse,
@@ -19,6 +23,12 @@ export const syncRepositoryCommits = async (
   try {
     const result = await commitParseService.sync(req.params.id);
     graphService.invalidate(req.params.id);
+    try {
+      await contributorAnalyticsService.syncContributors(req.params.id);
+    } catch (syncErr) {
+      console.warn('[CommitController] contributor sync after commit sync failed:', syncErr);
+    }
+    impactAnalysisService.invalidate(req.params.id);
     res.status(200).json({ success: true, data: result });
   } catch (error) {
     const message = error instanceof Error ? error.message : 'An unexpected error occurred.';
