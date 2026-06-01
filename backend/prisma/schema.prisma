@@ -1,0 +1,58 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Repository {
+  id        String   @id @default(uuid())
+  name      String
+  owner     String
+  url       String   @unique
+  localPath String
+  createdAt DateTime @default(now())
+  commits   Commit[]
+  branches  Branch[]
+
+  @@map("repositories")
+}
+
+model Commit {
+  id           String   @id @default(uuid())
+  hash         String
+  parentHashes String[]
+  author       String
+  email        String
+  message      String
+  commitDate   DateTime
+  repositoryId String
+  repository   Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  createdAt    DateTime @default(now())
+
+  @@unique([repositoryId, hash])
+  @@index([hash])
+  @@index([repositoryId])
+  @@index([repositoryId, commitDate])
+  @@map("commits")
+}
+
+model Branch {
+  id             String   @id @default(uuid())
+  name           String
+  repositoryId   String
+  headCommitHash String
+  isDefault      Boolean  @default(false)
+  repository     Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  createdAt      DateTime @default(now())
+
+  @@unique([repositoryId, name])
+  @@index([repositoryId])
+  @@index([headCommitHash])
+  @@map("branches")
+}
