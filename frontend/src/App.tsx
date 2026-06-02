@@ -1,9 +1,10 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Navigate, Routes, Route } from 'react-router-dom';
 import { Navbar } from './components/Navbar';
 import Dashboard from './pages/Dashboard';
 import RepositoryPage from './pages/RepositoryPage';
+import RepositoryLayout from './layouts/RepositoryLayout';
 import RepositoryGraphPage from './pages/RepositoryGraphPage';
 import RepositoryTimelinePage from './pages/RepositoryTimelinePage';
 import RepositoryInsightsPage from './pages/RepositoryInsightsPage';
@@ -32,13 +33,16 @@ function AppLayout() {
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/repositories" element={<RepositoryPage />} />
-          <Route path="/repositories/:id/graph" element={<RepositoryGraphPage />} />
-          <Route path="/repositories/:id/timeline" element={<RepositoryTimelinePage />} />
-          <Route path="/repositories/:id/insights" element={<RepositoryInsightsPage />} />
-          <Route path="/repositories/:id/files" element={<RepositoryFilesPage />} />
-          <Route path="/repositories/:id/compare" element={<BranchComparisonPage />} />
-          <Route path="/repositories/:id/playback" element={<RepositoryPlaybackPage />} />
-          <Route path="/repositories/:id/impact" element={<ImpactDashboardPage />} />
+          <Route path="/repositories/:repositoryId" element={<RepositoryLayout />}>
+            <Route index element={<Navigate to="graph" replace />} />
+            <Route path="graph" element={<RepositoryGraphPage />} />
+            <Route path="timeline" element={<RepositoryTimelinePage />} />
+            <Route path="files" element={<RepositoryFilesPage />} />
+            <Route path="insights" element={<RepositoryInsightsPage />} />
+            <Route path="compare" element={<BranchComparisonPage />} />
+            <Route path="playback" element={<RepositoryPlaybackPage />} />
+            <Route path="impact" element={<ImpactDashboardPage />} />
+          </Route>
         </Routes>
       </main>
     </div>
@@ -48,7 +52,12 @@ function AppLayout() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
+      <BrowserRouter
+        future={{
+          v7_startTransition: true,
+          v7_relativeSplatPath: true,
+        }}
+      >
         <AppLayout />
       </BrowserRouter>
       <ReactQueryDevtools initialIsOpen={false} />

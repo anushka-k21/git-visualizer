@@ -9,9 +9,7 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="min-h-[calc(100vh-56px)] flex flex-col">
-      {/* Hero section */}
       <div className="flex-1 flex flex-col items-center justify-center px-6 py-16">
-        {/* Decorative grid background */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
@@ -23,16 +21,14 @@ const Dashboard: React.FC = () => {
           }}
         />
 
-        {/* Glow orb */}
         <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full bg-blue-600/5 blur-3xl pointer-events-none" />
 
         <div className="relative w-full max-w-lg space-y-8 animate-fade-in">
-          {/* Header */}
           <div className="text-center space-y-3">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-600/10 border border-blue-500/20 mb-2">
               <div className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
               <span className="text-xs font-mono text-blue-400/80 tracking-widest uppercase">
-                Phase 1 — Repository Import
+                Git Visualizer
               </span>
             </div>
 
@@ -40,76 +36,42 @@ const Dashboard: React.FC = () => {
               Import a Repository
             </h1>
             <p className="text-sm text-[var(--text-secondary)] font-body leading-relaxed">
-              Paste any public GitHub, GitLab, or Bitbucket URL to clone and index it
-              for visualization.
+              Paste a public GitHub, GitLab, or Bitbucket URL to clone and explore commit history,
+              branches, insights, and more.
             </p>
           </div>
 
-          {/* Import card */}
           <div className="card p-6 shadow-2xl shadow-blue-950/20" style={{ borderColor: 'var(--border-bright)' }}>
-            {/* Terminal-style header */}
             <div className="flex items-center gap-2 mb-5 pb-4 border-b border-[var(--border)]">
               <div className="flex gap-1.5">
                 <div className="w-2.5 h-2.5 rounded-full bg-red-500/60" />
                 <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/60" />
                 <div className="w-2.5 h-2.5 rounded-full bg-green-500/60" />
               </div>
-              <span className="text-xs font-mono text-[var(--text-muted)] ml-1">
-                git clone
-              </span>
+              <span className="text-xs font-mono text-[var(--text-muted)] ml-1">git clone</span>
             </div>
 
             <ImportForm />
           </div>
 
-          {/* Repository link */}
           {repoCount > 0 && (
             <div className="text-center animate-fade-in">
               <Link
                 to="/repositories"
                 className="inline-flex items-center gap-2 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors group"
               >
-                <span>View {repoCount} imported {repoCount === 1 ? 'repository' : 'repositories'}</span>
+                <span>
+                  View {repoCount} imported {repoCount === 1 ? 'repository' : 'repositories'}
+                </span>
                 <ArrowIcon className="group-hover:translate-x-0.5 transition-transform" />
               </Link>
             </div>
           )}
-
-          {/* Example URLs */}
-          <div className="space-y-2">
-            <p className="text-xs font-display text-[var(--text-muted)] tracking-widest uppercase text-center">
-              Example URLs
-            </p>
-            <div className="grid grid-cols-1 gap-2">
-              {EXAMPLE_URLS.map((example) => (
-                <ExampleUrl key={example.url} {...example} />
-              ))}
-            </div>
-          </div>
         </div>
       </div>
     </div>
   );
 };
-
-const EXAMPLE_URLS = [
-  { url: 'https://github.com/facebook/react', label: 'facebook/react' },
-  { url: 'https://github.com/microsoft/vscode', label: 'microsoft/vscode' },
-  { url: 'https://github.com/vitejs/vite', label: 'vitejs/vite' },
-];
-
-const ExampleUrl: React.FC<{ url: string; label: string }> = ({ url, label }) => (
-  <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border)] group">
-    <span className="font-mono text-xs text-[var(--text-muted)]">{label}</span>
-    <button
-      onClick={() => navigator.clipboard.writeText(url)}
-      className="text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)] font-mono opacity-0 group-hover:opacity-100 transition-all duration-150"
-      title="Copy URL"
-    >
-      copy
-    </button>
-  </div>
-);
 
 const ArrowIcon: React.FC<{ className?: string }> = ({ className }) => (
   <svg className={`w-3.5 h-3.5 ${className}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

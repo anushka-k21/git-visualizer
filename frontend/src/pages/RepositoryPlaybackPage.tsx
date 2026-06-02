@@ -1,14 +1,13 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
 import { CommitGraph } from '../components/CommitGraph';
+import { useRepositoryWorkspace } from '../context/RepositoryContext';
 import { usePlayback } from '../hooks/useAdvanced';
 import { GraphResponse, PlaybackDateFilter } from '../types';
 
 const SPEEDS = [0.5, 1, 2, 5, 10] as const;
 
 const RepositoryPlaybackPage: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
-  const repositoryId = id ?? '';
+  const { repositoryId } = useRepositoryWorkspace();
   const [filter, setFilter] = useState<PlaybackDateFilter>('all');
   const [frameIndex, setFrameIndex] = useState(0);
   const [playing, setPlaying] = useState(false);
@@ -54,14 +53,10 @@ const RepositoryPlaybackPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-[calc(100vh-56px)]">
-      <div className="max-w-6xl mx-auto px-6 py-8">
-        <Link to={`/repositories/${repositoryId}/graph`} className="text-xs font-mono text-[var(--text-muted)]">
-          ← Graph
-        </Link>
-        <h1 className="text-2xl font-display font-semibold mt-2">Repository playback</h1>
+    <div className="animate-fade-in">
+      <h2 className="text-lg font-display font-semibold text-[var(--text-primary)] mb-4">Playback</h2>
 
-        <div className="flex flex-wrap gap-2 mt-4">
+        <div className="flex flex-wrap gap-2">
           {(['all', '1y', '6m'] as PlaybackDateFilter[]).map((f) => (
             <button
               key={f}
@@ -126,7 +121,7 @@ const RepositoryPlaybackPage: React.FC = () => {
               className="w-full mt-4"
             />
 
-            <div className="mt-6" style={{ height: 'calc(100vh - 320px)' }}>
+            <div className="mt-6 min-h-[480px]" style={{ height: 'calc(100vh - 320px)' }}>
               {displayGraph && (
                 <CommitGraph
                   graph={displayGraph}
@@ -143,7 +138,6 @@ const RepositoryPlaybackPage: React.FC = () => {
         {!isLoading && timeline.length === 0 && (
           <p className="text-sm text-[var(--text-muted)] mt-6">Sync commits to enable playback.</p>
         )}
-      </div>
     </div>
   );
 };

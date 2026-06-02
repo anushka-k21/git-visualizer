@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { useRepositoryWorkspace } from '../context/RepositoryContext';
 import {
   Bar,
   BarChart,
@@ -27,8 +28,7 @@ const tooltipStyle = {
 const TOP_LIMITS = [10, 25, 50] as const;
 
 const ImpactDashboardPage: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
-  const repositoryId = id ?? '';
+  const { repositoryId } = useRepositoryWorkspace();
   const navigate = useNavigate();
   const [limit, setLimit] = useState<number>(25);
   const [contributor, setContributor] = useState('');
@@ -65,14 +65,10 @@ const ImpactDashboardPage: React.FC = () => {
   }, [impact]);
 
   return (
-    <div className="min-h-[calc(100vh-56px)]">
-      <div className="max-w-6xl mx-auto px-6 py-8">
-        <Link to={`/repositories/${repositoryId}/insights`} className="text-xs font-mono text-[var(--text-muted)]">
-          ← Insights
-        </Link>
-        <h1 className="text-2xl font-display font-semibold mt-2">Commit impact</h1>
+    <div className="animate-fade-in">
+      <h2 className="text-lg font-display font-semibold text-[var(--text-primary)] mb-4">Impact</h2>
 
-        <div className="flex flex-wrap gap-2 mt-4">
+        <div className="flex flex-wrap gap-2">
           {TOP_LIMITS.map((n) => (
             <button
               key={n}
@@ -193,7 +189,7 @@ const ImpactDashboardPage: React.FC = () => {
             </div>
 
             {graph && (
-              <div className="mt-8" style={{ height: 420 }}>
+              <div className="mt-8 h-[420px] min-h-[420px]">
                 <h3 className="text-sm font-semibold mb-3">Graph (impact sizing)</h3>
                 <CommitGraph
                   graph={graph}
@@ -207,7 +203,6 @@ const ImpactDashboardPage: React.FC = () => {
             )}
           </>
         )}
-      </div>
     </div>
   );
 };

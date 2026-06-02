@@ -29,7 +29,11 @@ export const Navbar: React.FC<NavbarProps> = ({ repositoryCount }) => {
         {/* Navigation */}
         <div className="flex items-center gap-1">
           {navItems.map((item) => {
-            const isActive = location.pathname === item.path;
+            const isActive =
+              item.path === '/repositories'
+                ? location.pathname === '/repositories' ||
+                  /^\/repositories\/[^/]+/.test(location.pathname)
+                : location.pathname === item.path;
             return (
               <Link
                 key={item.path}

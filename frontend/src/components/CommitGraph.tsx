@@ -200,7 +200,10 @@ function CommitGraphInner({
   }, [onSelectCommit]);
 
   return (
-    <div className="w-full h-full min-h-[480px] rounded-xl border border-[var(--border)] overflow-hidden bg-[var(--bg-primary)]">
+    <div
+      className="w-full h-full min-h-[480px] rounded-xl border border-[var(--border)] overflow-hidden bg-[var(--bg-primary)]"
+      style={{ width: '100%', height: '100%', minHeight: 480 }}
+    >
       <ReactFlow
         nodes={nodes}
         edges={edges}

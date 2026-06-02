@@ -133,13 +133,62 @@ export class GitService {
     branches: { name: string; headCommitHash: string }[];
   }> {
     const git = this.getGit(localPath);
-    const summary = await git.branchLocal();
-    const branches = Object.entries(summary.branches).map(([name, detail]) => ({
-      name,
-      headCommitHash: detail.commit,
-    }));
+    const [localSummary, allSummary] = await Promise.all([
+      git.branchLocal(),
+      git.branch(['-a']),
+    ]);
 
-    return { current: summary.current, branches };
+    const branchesByName = new Map<string, { name: string; ref: string; headCommitHash: string }>();
+
+    const addBranch = (name: string, headCommitHash: string, preferExisting = false): void => {
+      const normalizedName = name
+        .replace(/^\*?\s*/, '')
+        .replace(/^remotes\/origin\//, '')
+        .replace(/^origin\//, '')
+        .trim();
+
+      if (
+        !normalizedName ||
+        normalizedName === 'HEAD' ||
+        normalizedName.includes(' -> ') ||
+        !headCommitHash
+      ) {
+        return;
+      }
+
+      if (preferExisting && branchesByName.has(normalizedName)) {
+        return;
+      }
+
+      const ref = name.replace(/^remotes\//, '').trim();
+      branchesByName.set(normalizedName, { name: normalizedName, ref, headCommitHash });
+    };
+
+    for (const [name, detail] of Object.entries(localSummary.branches)) {
+      addBranch(name, detail.commit);
+    }
+
+    for (const [name, detail] of Object.entries(allSummary.branches)) {
+      addBranch(name, detail.commit, true);
+    }
+
+    const branches = await Promise.all(
+      Array.from(branchesByName.values()).map(async (branch) => {
+        let headCommitHash = branch.headCommitHash;
+        try {
+          headCommitHash = (await git.revparse([branch.ref])).trim();
+        } catch {
+          try {
+            headCommitHash = (await git.revparse([branch.headCommitHash])).trim();
+          } catch {
+            // Keep the branch-list hash as a last resort; callers can still display the branch.
+          }
+        }
+        return { name: branch.name, headCommitHash };
+      })
+    );
+
+    return { current: localSummary.current, branches };
   }
 
   async listRepositoryFiles(localPath: string): Promise<string[]> {

@@ -1,15 +1,26 @@
 import React, { useMemo, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
 import { CommitGraph } from '../components/CommitGraph';
+import { useRepositoryWorkspace } from '../context/RepositoryContext';
 import { DiffViewer } from '../components/DiffViewer';
-import { useRepositoryBranches, useRepositoryGraph } from '../hooks/useCommits';
+import { useRepositoryBranches, useRepositoryGraph, useSyncBranches } from '../hooks/useCommits';
 import { useBranchComparison, useComparisonDiff } from '../hooks/useAdvanced';
 import { filterGraphByCommitHashes } from '../utils/graphFilter';
 
 const BranchComparisonPage: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
-  const repositoryId = id ?? '';
-  const { data: branches = [] } = useRepositoryBranches(repositoryId);
+  const { repositoryId } = useRepositoryWorkspace();
+  const {
+    data: branches = [],
+    isLoading: branchesLoading,
+    isError: branchesError,
+    error: branchesErr,
+    refetch: refetchBranches,
+  } = useRepositoryBranches(repositoryId, !!repositoryId);
+  const {
+    mutate: syncBranches,
+    isPending: syncingBranches,
+    isError: syncBranchesError,
+    error: syncBranchesErr,
+  } = useSyncBranches();
   const [sourceBranch, setSourceBranch] = useState<string | null>(null);
   const [targetBranch, setTargetBranch] = useState<string | null>(null);
   const [showDiff, setShowDiff] = useState(false);
@@ -25,6 +36,17 @@ const BranchComparisonPage: React.FC = () => {
   );
   const { data: diff, isLoading: diffLoading, isError: diffError, error: diffErr } =
     useComparisonDiff(repositoryId, sourceBranch, targetBranch, showDiff);
+
+  const handleSyncBranches = () => {
+    if (!repositoryId) return;
+    syncBranches(repositoryId, {
+      onSuccess: () => {
+        setSourceBranch(null);
+        setTargetBranch(null);
+        refetchBranches();
+      },
+    });
+  };
 
   const compareHighlights = useMemo(() => {
     if (!comparison) return undefined;
@@ -60,12 +82,33 @@ const BranchComparisonPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-[calc(100vh-56px)]">
-      <div className="max-w-6xl mx-auto px-6 py-8">
-        <Link to={`/repositories/${repositoryId}/graph`} className="text-xs font-mono text-[var(--text-muted)]">
-          ← Graph
-        </Link>
-        <h1 className="text-2xl font-display font-semibold mt-2">Branch comparison</h1>
+    <div className="animate-fade-in">
+        <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
+          <div>
+            <h2 className="text-lg font-display font-semibold text-[var(--text-primary)]">Compare</h2>
+            <p className="text-sm text-[var(--text-secondary)] mt-1">
+              Select two synced branches to compare commits and file changes.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={handleSyncBranches}
+            disabled={syncingBranches || !repositoryId}
+            className="btn-primary text-xs"
+          >
+            {syncingBranches ? 'Syncing...' : 'Sync branches'}
+          </button>
+        </div>
+
+        {(branchesError || syncBranchesError) && (
+          <p className="text-sm text-red-400 mt-4">
+            {branchesErr instanceof Error
+              ? branchesErr.message
+              : syncBranchesErr instanceof Error
+                ? syncBranchesErr.message
+                : 'Failed to load branches'}
+          </p>
+        )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
           <BranchSelect
@@ -74,6 +117,7 @@ const BranchComparisonPage: React.FC = () => {
             branches={branches}
             other={targetBranch}
             onChange={setSourceBranch}
+            disabled={branchesLoading || syncingBranches || branches.length === 0}
           />
           <BranchSelect
             label="Target branch"
@@ -81,14 +125,35 @@ const BranchComparisonPage: React.FC = () => {
             branches={branches}
             other={sourceBranch}
             onChange={setTargetBranch}
+            disabled={branchesLoading || syncingBranches || branches.length === 0}
           />
         </div>
+
+        {branchesLoading && (
+          <p className="text-sm text-[var(--text-muted)] mt-4">Loading branches...</p>
+        )}
+
+        {!branchesLoading && !branchesError && branches.length === 0 && (
+          <div className="card p-5 mt-4">
+            <p className="text-sm text-[var(--text-secondary)]">
+              No synced branches found. Sync branches after importing and syncing commits.
+            </p>
+            <button
+              type="button"
+              onClick={handleSyncBranches}
+              disabled={syncingBranches || !repositoryId}
+              className="btn-primary text-xs mt-4"
+            >
+              {syncingBranches ? 'Syncing...' : 'Sync branches'}
+            </button>
+          </div>
+        )}
 
         {sourceBranch === targetBranch && sourceBranch && (
           <p className="text-sm text-amber-400 mt-4">Select two different branches.</p>
         )}
 
-        {isLoading && <p className="text-sm text-[var(--text-muted)] mt-6">Comparing…</p>}
+        {isLoading && <p className="text-sm text-[var(--text-muted)] mt-6">Comparing...</p>}
         {isError && (
           <p className="text-sm text-red-400 mt-6">
             {error instanceof Error ? error.message : 'Comparison failed'}
@@ -121,7 +186,7 @@ const BranchComparisonPage: React.FC = () => {
               </div>
             )}
 
-            <div className="mt-8" style={{ height: 400 }}>
+            <div className="mt-8 h-[400px] min-h-[400px]">
               {filteredGraph && (
                 <CommitGraph
                   graph={filteredGraph}
@@ -150,7 +215,6 @@ const BranchComparisonPage: React.FC = () => {
             </div>
           </>
         )}
-      </div>
     </div>
   );
 };
@@ -161,13 +225,15 @@ const BranchSelect: React.FC<{
   branches: { name: string }[];
   other: string | null;
   onChange: (v: string) => void;
-}> = ({ label, value, branches, other, onChange }) => (
+  disabled?: boolean;
+}> = ({ label, value, branches, other, onChange, disabled = false }) => (
   <div className="card p-4">
     <label className="label">{label}</label>
     <select
       value={value ?? ''}
       onChange={(e) => onChange(e.target.value)}
       className="input-field mt-1 w-full"
+      disabled={disabled}
     >
       <option value="">Select branch</option>
       {branches
@@ -199,7 +265,7 @@ const CommitList: React.FC<{
       <h3 className="font-display font-semibold text-sm">{title}</h3>
       <input
         className="input-field mt-2 text-xs w-full"
-        placeholder="Search…"
+        placeholder="Search..."
         value={search}
         onChange={(e) => onSearchChange(e.target.value)}
       />
@@ -209,7 +275,7 @@ const CommitList: React.FC<{
         <li key={c.hash} className="px-4 py-2 text-xs">
           <p className="truncate text-[var(--text-primary)]">{c.message}</p>
           <p className="text-[var(--text-muted)] font-mono mt-0.5">
-            {c.author} · {c.hash.slice(0, 7)}
+            {c.author} - {c.hash.slice(0, 7)}
           </p>
         </li>
       ))}

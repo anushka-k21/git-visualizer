@@ -20,6 +20,7 @@ export function useRepository(id: string) {
     queryKey: QUERY_KEYS.repository(id),
     queryFn: () => repositoryApi.getById(id),
     enabled: !!id,
+    staleTime: 60_000,
   });
 }
 

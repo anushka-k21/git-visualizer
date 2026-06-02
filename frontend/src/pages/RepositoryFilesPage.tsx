@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
-import { useRepository } from '../hooks/useRepositories';
+import { useNavigate } from 'react-router-dom';
+import { useRepositoryWorkspace } from '../context/RepositoryContext';
 import { useFileHistory, useFiles } from '../hooks/useAnalytics';
 import { formatDate } from '../utils';
 
 const RepositoryFilesPage: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
-  const repositoryId = id ?? '';
+  const { repositoryId } = useRepositoryWorkspace();
   const navigate = useNavigate();
 
   const [search, setSearch] = useState('');
@@ -28,7 +27,6 @@ const RepositoryFilesPage: React.FC = () => {
     setAccumulatedEntries([]);
   }, [selectedPath, sort]);
 
-  const { data: repository } = useRepository(repositoryId);
   const { data: files = [], isLoading: filesLoading, isError: filesError, error: filesErr } =
     useFiles(repositoryId, debouncedSearch, !!repositoryId);
 
@@ -56,33 +54,9 @@ const RepositoryFilesPage: React.FC = () => {
     navigate(`/repositories/${repositoryId}/graph?commit=${hash}`);
   };
 
-  if (!repositoryId) {
-    return (
-      <div className="max-w-5xl mx-auto px-6 py-10">
-        <p className="text-sm text-[var(--text-secondary)]">Invalid repository.</p>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-[calc(100vh-56px)]">
-      <div className="relative max-w-6xl mx-auto px-6 py-10">
-        <div className="mb-6">
-          <Link
-            to="/repositories"
-            className="text-xs font-mono text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
-          >
-            ← Repositories
-          </Link>
-          <h1 className="text-2xl font-display font-semibold text-[var(--text-primary)] mt-2">
-            File evolution
-          </h1>
-          {repository && (
-            <p className="text-sm font-mono text-[var(--text-secondary)] mt-1">
-              {repository.owner}/{repository.name}
-            </p>
-          )}
-        </div>
+    <div className="animate-fade-in">
+      <h2 className="text-lg font-display font-semibold text-[var(--text-primary)] mb-4">Files</h2>
 
         <div
           className="flex flex-col lg:flex-row gap-4"
@@ -232,7 +206,6 @@ const RepositoryFilesPage: React.FC = () => {
             )}
           </main>
         </div>
-      </div>
     </div>
   );
 };

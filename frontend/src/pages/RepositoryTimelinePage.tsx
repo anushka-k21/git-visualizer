@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
-import { useRepository } from '../hooks/useRepositories';
+import { useNavigate } from 'react-router-dom';
+import { useRepositoryWorkspace } from '../context/RepositoryContext';
 import { useRepositoryTimeline } from '../hooks/useCommits';
 import { TimelineCommit, TimelineGroupBy } from '../types';
 
@@ -11,14 +11,12 @@ const GROUP_OPTIONS: { value: TimelineGroupBy; label: string }[] = [
 ];
 
 const RepositoryTimelinePage: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
-  const repositoryId = id ?? '';
+  const { repositoryId } = useRepositoryWorkspace();
   const navigate = useNavigate();
   const [groupBy, setGroupBy] = useState<TimelineGroupBy>('day');
   const [search, setSearch] = useState('');
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
 
-  const { data: repository, isLoading: repoLoading, isError: repoError } = useRepository(repositoryId);
   const {
     data: timeline = [],
     isLoading: timelineLoading,
@@ -63,35 +61,9 @@ const RepositoryTimelinePage: React.FC = () => {
     });
   };
 
-  const isLoading = repoLoading || timelineLoading;
-
-  if (!repositoryId) {
-    return (
-      <div className="max-w-5xl mx-auto px-6 py-10">
-        <p className="text-sm text-[var(--text-secondary)]">Invalid repository.</p>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-[calc(100vh-56px)]">
-      <div className="relative max-w-4xl mx-auto px-6 py-10">
-        <div className="mb-8 animate-fade-in">
-          <Link
-            to={`/repositories/${repositoryId}/graph`}
-            className="text-xs font-mono text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
-          >
-            ← Graph
-          </Link>
-          <h1 className="text-2xl font-display font-semibold text-[var(--text-primary)] mt-2">
-            Timeline
-          </h1>
-          {repository && (
-            <p className="text-sm text-[var(--text-secondary)] mt-1 font-mono">
-              {repository.owner}/{repository.name}
-            </p>
-          )}
-        </div>
+    <div className="animate-fade-in max-w-4xl">
+      <h2 className="text-lg font-display font-semibold text-[var(--text-primary)] mb-4">Timeline</h2>
 
         <div className="flex flex-wrap items-center gap-3 mb-6">
           <div className="flex rounded-lg border border-[var(--border)] overflow-hidden">
@@ -124,13 +96,7 @@ const RepositoryTimelinePage: React.FC = () => {
           />
         </div>
 
-        {repoError && (
-          <div className="card p-8 text-center">
-            <p className="text-sm text-[var(--text-secondary)]">Repository not found.</p>
-          </div>
-        )}
-
-        {isLoading && !repoError && (
+        {timelineLoading && (
           <div className="space-y-3">
             {[0, 1, 2, 3].map((i) => (
               <div key={i} className="card h-16 animate-pulse" />
@@ -138,7 +104,7 @@ const RepositoryTimelinePage: React.FC = () => {
           </div>
         )}
 
-        {timelineError && !isLoading && (
+        {timelineError && !timelineLoading && (
           <div className="card p-8 text-center">
             <p className="text-sm text-red-400 mb-4">
               {timelineErr instanceof Error ? timelineErr.message : 'Failed to load timeline'}
@@ -149,20 +115,15 @@ const RepositoryTimelinePage: React.FC = () => {
           </div>
         )}
 
-        {!isLoading && !timelineError && filteredTimeline.length === 0 && (
+        {!timelineLoading && !timelineError && filteredTimeline.length === 0 && (
           <div className="card p-12 text-center">
             <p className="text-sm text-[var(--text-secondary)]">
-              {search ? 'No commits match your search.' : 'No timeline data. Sync commits first.'}
+              {search ? 'No commits match your search.' : 'No timeline data. Sync commits from the Graph tab first.'}
             </p>
-            {!search && (
-              <Link to={`/repositories/${repositoryId}/graph`} className="btn-primary mx-auto mt-4 inline-flex">
-                Go to graph
-              </Link>
-            )}
           </div>
         )}
 
-        {!isLoading && filteredTimeline.length > 0 && (
+        {!timelineLoading && filteredTimeline.length > 0 && (
           <div className="space-y-3 max-h-[calc(100vh-280px)] overflow-y-auto pr-1">
             {filteredTimeline.map((period) => {
               const isOpen = expanded.has(period.period);
@@ -217,7 +178,6 @@ const RepositoryTimelinePage: React.FC = () => {
             })}
           </div>
         )}
-      </div>
     </div>
   );
 };

@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
 import { ContributorCharts } from '../components/ContributorCharts';
 import { ContributionHeatmap } from '../components/ContributionHeatmap';
 import { StatCard } from '../components/StatCard';
-import { useRepository } from '../hooks/useRepositories';
+import { useRepositoryWorkspace } from '../context/RepositoryContext';
 import {
   useContributors,
   useHeatmap,
@@ -14,12 +13,10 @@ import { HeatmapRange } from '../types';
 import { formatDate } from '../utils';
 
 const RepositoryInsightsPage: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
-  const repositoryId = id ?? '';
+  const { repositoryId } = useRepositoryWorkspace();
   const [heatmapRange, setHeatmapRange] = useState<HeatmapRange>('1y');
   const [selectedContributorId, setSelectedContributorId] = useState<string | null>(null);
 
-  const { data: repository } = useRepository(repositoryId);
   const { data: stats, isLoading: statsLoading, isError: statsError, error: statsErr, refetch } =
     useRepositoryStats(repositoryId, !!repositoryId);
   const { data: contributors = [], isLoading: contributorsLoading } = useContributors(
@@ -33,53 +30,19 @@ const RepositoryInsightsPage: React.FC = () => {
   );
   const { mutate: syncContributors, isPending: syncingContributors } = useSyncContributors();
 
-  if (!repositoryId) {
-    return (
-      <div className="max-w-5xl mx-auto px-6 py-10">
-        <p className="text-sm text-[var(--text-secondary)]">Invalid repository.</p>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-[calc(100vh-56px)]">
-      <div className="relative max-w-6xl mx-auto px-6 py-10">
-        <div className="mb-8 animate-fade-in">
-          <Link
-            to="/repositories"
-            className="text-xs font-mono text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
-          >
-            ← Repositories
-          </Link>
-          <div className="flex flex-wrap items-start justify-between gap-4 mt-2">
-            <div>
-              <h1 className="text-2xl font-display font-semibold text-[var(--text-primary)]">
-                Repository insights
-              </h1>
-              {repository && (
-                <p className="text-sm font-mono text-[var(--text-secondary)] mt-1">
-                  {repository.owner}/{repository.name}
-                </p>
-              )}
-            </div>
-            <div className="flex gap-2 flex-wrap">
-              <Link to={`/repositories/${repositoryId}/graph`} className="btn-ghost text-xs">
-                Graph
-              </Link>
-              <Link to={`/repositories/${repositoryId}/files`} className="btn-ghost text-xs">
-                Files
-              </Link>
-              <button
-                type="button"
-                onClick={() => syncContributors(repositoryId)}
-                disabled={syncingContributors}
-                className="btn-primary text-xs"
-              >
-                {syncingContributors ? 'Syncing…' : 'Sync contributors'}
-              </button>
-            </div>
-          </div>
-        </div>
+    <div className="animate-fade-in">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+        <h2 className="text-lg font-display font-semibold text-[var(--text-primary)]">Insights</h2>
+        <button
+          type="button"
+          onClick={() => syncContributors(repositoryId)}
+          disabled={syncingContributors}
+          className="btn-primary text-xs"
+        >
+          {syncingContributors ? 'Syncing…' : 'Sync contributors'}
+        </button>
+      </div>
 
         {statsError && (
           <div className="card p-6 mb-6 text-center">
@@ -197,7 +160,6 @@ const RepositoryInsightsPage: React.FC = () => {
             )}
           </div>
         </section>
-      </div>
     </div>
   );
 };
