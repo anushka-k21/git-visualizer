@@ -1,5 +1,5 @@
 {
-  "name": "git-visualizer-frontend",
+  "name": "gitscope-frontend",
   "version": "1.0.0",
   "type": "module",
   "scripts": {
@@ -13,7 +13,7 @@
     "@tanstack/react-query-devtools": "^5.24.1",
     "@xyflow/react": "^12.10.2",
     "axios": "^1.6.7",
-    "git-visualizer": "file:..",
+    "gitscope": "file:..",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.22.2",

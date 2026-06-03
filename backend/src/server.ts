@@ -9,7 +9,7 @@ import { requestLogger } from './middleware/requestLogger';
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3000;
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 
 // ── Middleware ─────────────────────────────────────────────
@@ -30,7 +30,7 @@ app.get('/health', (_req, res) => {
 app.get('/', (_req, res) => {
   res.json({
     success: true,
-    message: 'Git Visualizer API is running',
+    message: 'GitScope API is running',
     health: '/health',
     api: '/api/repositories',
   });
@@ -46,7 +46,7 @@ app.use(errorHandler);
 
 // ── Start Server ───────────────────────────────────────────
 app.listen(PORT, () => {
-  console.log(`\n🚀 Git Visualizer API running at http://localhost:${PORT}`);
+  console.log(`\n🚀 GitScope API running at http://localhost:${PORT}`);
   console.log(`📁 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🔗 Frontend URL: ${FRONTEND_URL}\n`);
 });

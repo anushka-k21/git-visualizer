@@ -22,7 +22,7 @@ export const Navbar: React.FC<NavbarProps> = ({ repositoryCount }) => {
             <BranchIcon />
           </div>
           <span className="font-display font-semibold text-sm text-[var(--text-primary)] tracking-tight">
-            git<span className="text-blue-400">viz</span>
+            Git<span className="text-blue-400">Scope</span>
           </span>
         </Link>
 

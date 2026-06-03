@@ -28,7 +28,7 @@ const Dashboard: React.FC = () => {
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-600/10 border border-blue-500/20 mb-2">
               <div className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
               <span className="text-xs font-mono text-blue-400/80 tracking-widest uppercase">
-                Git Visualizer
+                GitScope
               </span>
             </div>
 

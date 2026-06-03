@@ -1,496 +1,449 @@
-# Git Visualizer
+# GitScope
 
-A web application for visualizing Git repositories. Phase 1 covers import and management. Phase 2–3 add commit parsing, sync, and an interactive commit graph.
+A full-stack Git repository analytics and visualization platform that enables developers to import repositories, analyze commit history, explore branches, inspect file evolution, compare branches, replay repository growth, and discover repository insights through interactive visualizations.
+
+---
+
+## Overview
+
+GitScope transforms raw Git data into interactive visual analytics.
+
+The platform imports repositories, synchronizes Git history, stores metadata in PostgreSQL, and provides multiple views for understanding repository evolution and contributor activity.
+
+Key capabilities include:
+
+* Repository management and synchronization
+* Interactive commit graph visualization
+* Branch visualization and comparison
+* Timeline-based repository exploration
+* Contributor analytics and repository insights
+* File evolution tracking
+* Commit diff inspection
+* Repository playback and historical replay
+* Commit impact analysis
 
 ---
 
 ## Tech Stack
 
-| Layer | Tech |
-|---|---|
-| Frontend | React 18, TypeScript, Vite, Tailwind CSS, React Query, Axios, React Flow |
-| Backend | Node.js, Express, TypeScript |
-| Database | PostgreSQL + Prisma ORM |
-| Git | simple-git |
+| Layer               | Technology                   |
+| ------------------- | ---------------------------- |
+| Frontend            | React 18, TypeScript, Vite   |
+| UI                  | Tailwind CSS                 |
+| State Management    | React Query                  |
+| HTTP Client         | Axios                        |
+| Graph Visualization | React Flow                   |
+| Charts & Analytics  | Recharts                     |
+| Backend             | Node.js, Express, TypeScript |
+| Database            | PostgreSQL                   |
+| ORM                 | Prisma                       |
+| Git Operations      | simple-git                   |
+
+---
+
+## Features
+
+### Repository Management
+
+* Import Git repositories using URL
+* Clone repositories locally
+* Repository metadata storage
+* Repository search and filtering
+* Repository deletion
+* Repository synchronization
+
+### Commit Visualization
+
+* Interactive commit graph
+* Branch visualization
+* Merge commit highlighting
+* Commit details panel
+* Commit filtering
+* Zoom and pan support
+* Commit focus and navigation
+
+### Repository Timeline
+
+* Day, week, and month grouping
+* Chronological repository exploration
+* Timeline-to-graph navigation
+* Commit activity tracking
+
+### Contributor Analytics
+
+* Contributor aggregation
+* Top contributor rankings
+* Contributor activity charts
+* Contribution heatmaps
+* Repository statistics
+* Contributor detail pages
+
+### File Analysis
+
+* Repository file explorer
+* File search
+* File commit history
+* File evolution tracking
+* File-to-commit navigation
+
+### Diff Viewer
+
+* Commit diff inspection
+* Unified diff mode
+* Split diff mode
+* File-level change statistics
+* Added, modified, deleted, and renamed file support
+
+### Branch Comparison
+
+* Branch comparison interface
+* Ahead/behind analysis
+* Merge base detection
+* Unique commit identification
+* Aggregate branch diffs
+* Comparison graph highlighting
+
+### Repository Playback
+
+* Historical repository replay
+* Timeline scrubber
+* Playback controls
+* Adjustable playback speed
+* Graph animation over time
+
+### Commit Impact Analysis
+
+* Impact score calculation
+* Impact rankings
+* Repository impact dashboard
+* Impact visualizations
+* Commit significance metrics
+* Graph node scaling based on impact
+
+### Repository Workspace
+
+Each repository is accessed through a dedicated workspace containing:
+
+* Graph
+* Timeline
+* Files
+* Insights
+* Compare
+* Playback
+* Impact
+
+Repository context is shared across all views through a unified navigation system.
 
 ---
 
 ## Project Structure
 
-```
-git-visualizer/
-├── frontend/
-│   └── src/
-│       ├── components/       # ImportForm, RepositoryCard, Navbar
-│       ├── pages/            # Dashboard.tsx, RepositoryPage.tsx
-│       ├── services/         # api.ts (Axios instance + repository API)
-│       ├── hooks/            # useRepositories.ts (React Query hooks)
-│       ├── types/            # index.ts (shared TypeScript types)
-│       ├── utils/            # index.ts (date formatting, URL parsing)
-│       └── App.tsx
+```text
+gitscope/
 │
-└── backend/
-    └── src/
-        ├── controllers/      # repositoryController.ts
-        ├── services/
-        │   └── git/          # gitService.ts (simple-git clone)
-        ├── services/         # repositoryService.ts (business logic)
-        ├── routes/           # repositoryRoutes.ts
-        ├── middleware/       # errorHandler.ts, requestLogger.ts
-        ├── utils/            # prisma.ts, gitUrlParser.ts
-        ├── types/            # index.ts
-        ├── prisma/
-        │   └── schema.prisma
-        └── server.ts
+├── frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   ├── layouts/
+│   │   ├── pages/
+│   │   ├── hooks/
+│   │   ├── services/
+│   │   ├── contexts/
+│   │   ├── types/
+│   │   ├── utils/
+│   │   └── App.tsx
+│   │
+│   ├── public/
+│   └── vite.config.ts
+│
+├── backend/
+│   ├── prisma/
+│   │   ├── schema.prisma
+│   │   └── migrations/
+│   │
+│   ├── src/
+│   │   ├── controllers/
+│   │   ├── routes/
+│   │   ├── services/
+│   │   │   ├── git/
+│   │   │   ├── graph/
+│   │   │   ├── analytics/
+│   │   │   ├── playback/
+│   │   │   ├── compare/
+│   │   │   ├── impact/
+│   │   │   └── files/
+│   │   │
+│   │   ├── middleware/
+│   │   ├── utils/
+│   │   ├── types/
+│   │   └── server.ts
+│   │
+│   └── repositories/
+│
+├── package.json
+└── README.md
 ```
 
 ---
 
 ## Prerequisites
 
-- **Node.js** ≥ 18
-- **PostgreSQL** ≥ 14
-- **Git** (installed and on PATH)
+* Node.js 18+
+* PostgreSQL 14+
+* Git installed and available on PATH
 
 ---
 
-## Setup Instructions
+## Installation
 
-### 1. Clone this project
+### Clone Repository
 
 ```bash
-git clone <this-repo-url>
-cd git-visualizer
+git clone <repository-url>
+cd gitscope
 ```
 
-### 2. Set up PostgreSQL
-
-Create a database:
+### Create Database
 
 ```sql
-CREATE DATABASE git_visualizer;
+CREATE DATABASE gitscope;
 ```
 
-### 3. Configure backend environment
+### Configure Environment
 
-```bash
-cp backend/.env.example backend/.env
+Create:
+
+```text
+backend/.env
 ```
 
-Edit `backend/.env`:
+Example:
 
 ```env
-DATABASE_URL="postgresql://YOUR_USER:YOUR_PASSWORD@localhost:5432/git_visualizer?schema=public"
+DATABASE_URL="postgresql://USER:PASSWORD@localhost:5432/gitscope?schema=public"
 PORT=3001
 NODE_ENV=development
 REPOSITORIES_PATH="./repositories"
 FRONTEND_URL="http://localhost:5173"
 ```
 
-### 4. Install dependencies
+### Install Dependencies
 
 ```bash
-# From project root
-npm install          # installs concurrently
-npm run install:all  # installs frontend + backend deps
+npm install
+npm run install:all
 ```
 
-Or manually:
-
-```bash
-cd frontend && npm install
-cd ../backend && npm install
-```
-
-### 5. Generate Prisma client & run migrations
+### Generate Prisma Client
 
 ```bash
 cd backend
+
 npx prisma generate
+```
+
+### Run Database Migrations
+
+```bash
 npx prisma migrate dev
 ```
 
-This creates the `repositories` and `commits` tables in PostgreSQL.
+### Start Development Servers
 
-### 6. Start development servers
-
-From the **project root**:
+From project root:
 
 ```bash
 npm run dev
 ```
 
-Or start separately:
+Frontend:
 
-```bash
-# Terminal 1 — backend on :3001
-npm run dev:backend
-
-# Terminal 2 — frontend on :5173
-npm run dev:frontend
+```text
+http://localhost:5173
 ```
 
-Open **http://localhost:5173**
+Backend:
+
+```text
+http://localhost:3001
+```
 
 ---
 
 ## Environment Variables
 
-### Backend (`backend/.env`)
+### Backend
 
-| Variable | Default | Description |
-|---|---|---|
-| `DATABASE_URL` | — | PostgreSQL connection string (required) |
-| `PORT` | `3001` | Express server port |
-| `NODE_ENV` | `development` | `development` or `production` |
-| `REPOSITORIES_PATH` | `./repositories` | Where cloned repos are stored |
-| `FRONTEND_URL` | `http://localhost:5173` | CORS allowed origin |
+| Variable          | Description                  |
+| ----------------- | ---------------------------- |
+| DATABASE_URL      | PostgreSQL connection string |
+| PORT              | Backend server port          |
+| NODE_ENV          | Environment                  |
+| REPOSITORIES_PATH | Local repository storage     |
+| FRONTEND_URL      | Allowed frontend origin      |
 
 ---
 
-## Database Schema
+## Database Tables
 
-```prisma
-model Repository {
-  id        String   @id @default(uuid())
-  name      String
-  owner     String
-  url       String   @unique
-  localPath String
-  createdAt DateTime @default(now())
-  commits   Commit[]
-}
+The application uses the following primary tables:
 
-model Commit {
-  id           String   @id @default(uuid())
-  hash         String
-  parentHashes String[]
-  author       String
-  email        String
-  message      String
-  commitDate   DateTime
-  repositoryId String
-  createdAt    DateTime @default(now())
+### repositories
 
-  @@unique([repositoryId, hash])
-}
+Stores repository metadata.
+
+### commits
+
+Stores synchronized commit history.
+
+### branches
+
+Stores repository branches and branch metadata.
+
+### contributors
+
+Stores contributor aggregates and contributor statistics.
+
+### _prisma_migrations
+
+Managed automatically by Prisma for migration tracking.
+
+---
+
+## Main Application Routes
+
+### General Routes
+
+| Route         | Description                 |
+| ------------- | --------------------------- |
+| /             | Repository import dashboard |
+| /repositories | Repository listing          |
+
+### Repository Workspace Routes
+
+| Route                      | Description            |
+| -------------------------- | ---------------------- |
+| /repositories/:id/graph    | Commit graph           |
+| /repositories/:id/timeline | Repository timeline    |
+| /repositories/:id/files    | File explorer          |
+| /repositories/:id/insights | Repository analytics   |
+| /repositories/:id/compare  | Branch comparison      |
+| /repositories/:id/playback | Repository playback    |
+| /repositories/:id/impact   | Commit impact analysis |
+
+---
+
+## API Overview
+
+### Repository APIs
+
+```http
+POST   /api/repositories/import
+GET    /api/repositories
+GET    /api/repositories/:id
+DELETE /api/repositories/:id
+POST   /api/repositories/:id/sync
+```
+
+### Commit APIs
+
+```http
+GET /api/repositories/:id/commits
+GET /api/repositories/:id/graph
+GET /api/commits/:hash
+GET /api/commits/:hash/diff
+```
+
+### Branch APIs
+
+```http
+POST /api/repositories/:id/sync-branches
+GET  /api/repositories/:id/branches
+GET  /api/repositories/:id/compare
+GET  /api/repositories/:id/compare/diff
+```
+
+### Timeline APIs
+
+```http
+GET /api/repositories/:id/timeline
+```
+
+### Analytics APIs
+
+```http
+GET /api/repositories/:id/stats
+GET /api/repositories/:id/contributors
+GET /api/repositories/:id/contributors/:contributorId
+GET /api/repositories/:id/heatmap
+```
+
+### File APIs
+
+```http
+GET /api/repositories/:id/files
+GET /api/repositories/:id/files/history
+```
+
+### Playback APIs
+
+```http
+GET /api/repositories/:id/playback
+```
+
+### Impact APIs
+
+```http
+GET /api/repositories/:id/impact
 ```
 
 ---
 
-## API Documentation
+## Supported Repository URLs
 
-### Base URL: `http://localhost:3001/api`
+```text
+https://github.com/owner/repository
 
----
+https://github.com/owner/repository.git
 
-### `POST /repositories/import`
+https://gitlab.com/owner/repository
 
-Import a Git repository by URL.
+https://bitbucket.org/owner/repository
 
-**Request body:**
-
-```json
-{
-  "url": "https://github.com/facebook/react"
-}
-```
-
-**Success response** `201`:
-
-```json
-{
-  "success": true,
-  "data": {
-    "id": "uuid",
-    "name": "react",
-    "owner": "facebook",
-    "url": "https://github.com/facebook/react",
-    "localPath": "/abs/path/to/repositories/facebook__react",
-    "createdAt": "2024-03-01T12:00:00.000Z"
-  },
-  "message": "Repository \"facebook/react\" imported successfully."
-}
-```
-
-**Error responses:**
-
-| Status | Reason |
-|---|---|
-| `400` | Missing or invalid URL |
-| `409` | Repository already imported |
-| `422` | Git clone failed (private repo, bad URL, etc.) |
-| `500` | Internal server error |
-
----
-
-### `GET /repositories`
-
-List all imported repositories (newest first).
-
-**Success response** `200`:
-
-```json
-{
-  "success": true,
-  "data": [ /* Repository[] */ ]
-}
+git@github.com:owner/repository.git
 ```
 
 ---
 
-### `GET /repositories/:id`
+## Development Notes
 
-Get a single repository by ID.
-
-**Success response** `200`:
-
-```json
-{
-  "success": true,
-  "data": { /* Repository */ }
-}
-```
+* Repository synchronization is idempotent.
+* Existing commits are not duplicated.
+* Large repositories may require several minutes to synchronize.
+* Commit graph rendering uses React Flow.
+* Analytics data is generated from synchronized Git history.
+* Branch comparison and impact analysis operate on locally cloned repositories.
 
 ---
 
-### `DELETE /repositories/:id`
+## Prisma Studio
 
-Delete a repository (removes database record, all commits, and local clone).
-
-**Success response** `200`:
-
-```json
-{
-  "success": true,
-  "message": "Repository deleted successfully."
-}
-```
-
----
-
-### `POST /repositories/:id/sync`
-
-Parse commit history from the local clone and store commits in the database. Shallow Phase 1 clones are unshallowed automatically before parsing.
-
-**Success response** `200`:
-
-```json
-{
-  "success": true,
-  "data": {
-    "repositoryId": "uuid",
-    "commitsParsed": 1523,
-    "commitsStored": 1523
-  }
-}
-```
-
-Re-running sync is idempotent (`commitsStored` may be `0` if all commits already exist).
-
----
-
-### `GET /repositories/:id/commits`
-
-List stored commits (newest first).
-
-**Success response** `200`:
-
-```json
-{
-  "success": true,
-  "data": [
-    {
-      "hash": "abc123...",
-      "author": "Jane Doe",
-      "message": "Fix bug",
-      "commitDate": "2025-01-15T10:00:00.000Z",
-      "parents": ["def456..."]
-    }
-  ]
-}
-```
-
----
-
-### `GET /repositories/:id/graph`
-
-Return commit graph nodes (with layout positions) and edges for visualization.
-
-**Success response** `200`:
-
-```json
-{
-  "success": true,
-  "data": {
-    "nodes": [
-      {
-        "id": "abc123",
-        "position": { "x": 0, "y": 0 },
-        "data": {
-          "hash": "abc123",
-          "author": "Jane",
-          "message": "Initial commit",
-          "commitDate": "2025-01-15T10:00:00.000Z",
-          "isMerge": false
-        }
-      }
-    ],
-    "edges": [
-      { "id": "parent-child", "source": "parent", "target": "child" }
-    ]
-  }
-}
-```
-
----
-
-### `GET /commits/:hash?repositoryId=`
-
-Detailed commit info including file stats from Git (`git diff-tree --numstat`).
-
----
-
-### `POST /repositories/:id/sync-branches`
-
-Refresh branch list from local clone.
-
----
-
-### `GET /repositories/:id/branches`
-
-List branches with commit counts per branch.
-
----
-
-### `GET /repositories/:id/timeline?groupBy=day|week|month`
-
-Chronological commit groups for timeline view.
-
----
-
-### `GET /health`
-
-Health check endpoint.
-
-```json
-{ "status": "ok", "timestamp": "..." }
-```
-
----
-
-## Supported URL Formats
-
-```
-https://github.com/owner/repo
-https://github.com/owner/repo.git
-https://gitlab.com/owner/repo
-https://bitbucket.org/owner/repo
-git@github.com:owner/repo.git
-```
-
----
-
-## Features
-
-### Phase 1
-
-- [x] Repository import via URL (POST /repositories/import)
-- [x] Git clone via simple-git (full history)
-- [x] Metadata storage in PostgreSQL via Prisma
-- [x] Import page with loading / success / error states
-- [x] Repository listing page with search
-- [x] Delete repositories (DB + local clone)
-- [x] Full TypeScript (frontend + backend)
-- [x] Proper error handling with descriptive messages
-- [x] React Query for server state management
-
-### Phase 2–3
-
-- [x] Commit model and parsing engine (POST /repositories/:id/sync)
-- [x] List commits (GET /repositories/:id/commits)
-- [x] Graph layout service (GET /repositories/:id/graph)
-- [x] Unshallow support for legacy shallow clones on sync
-- [x] React Flow commit graph UI at `/repositories/:id/graph`
-- [x] Pan, zoom, fit view, and commit node selection
-
-### Phase 8–10
-
-- [x] Commit diff viewer (`GET /commits/:hash/diff`) with unified/split UI
-- [x] Branch comparison (`GET /repositories/:id/compare`) + aggregate diff
-- [x] Repository playback (`GET /repositories/:id/playback`)
-- [x] Commit impact analysis (`GET /repositories/:id/impact`) with on-demand cache
-- [x] Graph integrations: compare highlights, impact node sizing
-
-### Phase 6–7
-
-- [x] Contributor model and aggregation (email as identity)
-- [x] Repository statistics (GET /repositories/:id/stats)
-- [x] Contributor APIs and insights dashboard with Recharts
-- [x] Contribution heatmap (GET /repositories/:id/heatmap?range=)
-- [x] File explorer and history (GET /files, GET /files/history)
-- [x] File history → graph navigation
-
-### Phase 4–5
-
-- [x] Commit details panel (GET /commits/:hash)
-- [x] Branch model, sync, and sidebar filtering
-- [x] Branch head labels and merge commit styling on graph
-- [x] Timeline page with day/week/month grouping
-- [x] Timeline → graph navigation with commit focus
-- [x] Backend unit tests (`npm test` in `backend/`)
-
-### Workflow
-
-1. Import a repository from the dashboard.
-2. Open **Repositories** → **Graph**.
-3. Click **Sync commits**, then **Sync branches** in the sidebar.
-4. Select commits for details; filter by branch; use **Timeline** for chronological browse.
-
-Large repositories (10k+ commits) may take several minutes to sync.
-
-### Database migrations
+To inspect the database:
 
 ```bash
 cd backend
-npx prisma migrate dev
+
+npx prisma studio
 ```
 
-### New API endpoints (Phase 6–7)
+Default URL:
 
-| Method | Path | Description |
-|--------|------|-------------|
-| POST | `/repositories/:id/sync-contributors` | Rebuild contributor aggregates |
-| GET | `/repositories/:id/stats` | Repository-wide statistics + chart data |
-| GET | `/repositories/:id/contributors` | Contributor list |
-| GET | `/repositories/:id/contributors/:contributorId` | Contributor detail |
-| GET | `/repositories/:id/heatmap?range=30d\|90d\|1y\|all` | Daily commit counts |
-| GET | `/repositories/:id/files?search=` | List repository files |
-| GET | `/repositories/:id/files/history?path=` | Paginated file history |
-| GET | `/commits/:hash/diff?repositoryId=` | Commit diff with patches |
-| GET | `/repositories/:id/compare?sourceBranch=&targetBranch=` | Branch comparison |
-| GET | `/repositories/:id/compare/diff?...` | Aggregate diff between branches |
-| GET | `/repositories/:id/playback?filter=all\|1y\|6m` | Playback timeline frames |
-| GET | `/repositories/:id/impact?limit=` | Top impactful commits + scores |
-
-### UI routes
-
-- `/repositories/:id/insights` — stats, charts, heatmap, contributors
-- `/repositories/:id/files` — file explorer and history
-- `/repositories/:id/compare` — branch comparison + graph highlights
-- `/repositories/:id/playback` — history replay controls
-- `/repositories/:id/impact` — impact dashboard and graph sizing
-
-**Impact scoring:** computed on demand with in-memory cache (invalidated on commit sync). Samples up to 500 commits for line-level stats via `git diff-tree`; remaining commits use graph-derived metrics (descendants, merges, branch heads).
+```text
+http://localhost:5555
+```
 
 ---
 
-## Prisma Studio (optional)
+## License
 
-Browse your database visually:
-
-```bash
-cd backend && npx prisma studio
-```
-
-Opens at **http://localhost:5555**
+This project is intended for educational, research, and portfolio purposes.
